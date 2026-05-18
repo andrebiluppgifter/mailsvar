@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Biluppgifter — Mailutkast</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --panel: #ffffff;
+    --panel-2: #fafbfc;
+    --border: #e5e7eb;
+    --border-light: #f0f2f5;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --accent: #ff7a1a;
+    --accent-2: #e86a0d;
+    --accent-soft: #fff4e8;
+    --user-bg: #fff4e8;
+    --user-border: #f5dcc1;
+    --bot-bg: #ffffff;
+    --code-bg: #f5f7fa;
+    --ok: #16a34a;
+    --danger: #dc2626;
+    --radius: 14px;
+    --radius-lg: 18px;
+    --shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 8px 32px rgba(15, 23, 42, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--accent);
+  }
+  .brand .logo {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .brand .logo img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+  .brand small {
+    color: var(--muted);
+    font-weight: 400;
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+  }
+  header .actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .icon-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 20px 160px;
+    scroll-behavior: smooth;
+  }
+  .chat {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .welcome {
+    max-width: 600px;
+    margin: 32px auto 24px;
+    text-align: center;
+  }
+  .welcome h1 {
+    font-size: 26px;
+    margin: 0 0 12px;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .welcome p {
+    color: var(--muted);
+    margin: 0 0 8px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .welcome .tip {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 16px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-align: left;
+  }
+  .welcome .tip strong { color: var(--text); }
+
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .msg.user .avatar { background: var(--user-bg); color: var(--accent); }
+  .msg.bot .avatar { background: transparent; padding: 0; }
+  .msg.bot .avatar img {
+    width: 100%; height: 100%; display: block; object-fit: contain;
+  }
+  .msg .bubble {
+    flex: 1;
+    background: var(--bot-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    line-height: 1.6;
+    font-size: 15px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .msg.user .bubble {
+    background: var(--user-bg);
+    border-color: var(--user-border);
+    white-space: pre-wrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .msg.bot .bubble {
+    white-space: pre-wrap;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .msg.bot .bubble:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { background: var(--ok); border-color: var(--ok); color: white; opacity: 1; }
+
+  .typing {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px 0;
+  }
+  .typing span {
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: typing 1.2s infinite;
+    opacity: 0.4;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; transform: scale(0.85); }
+    30% { opacity: 1; transform: scale(1); }
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px 20px;
+    background: linear-gradient(180deg, transparent 0%, rgba(244, 246, 248, 0.9) 30%, var(--bg) 100%);
+    pointer-events: none;
+  }
+  .composer {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 10px 10px 18px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+    transition: border-color 0.15s ease;
+  }
+  .composer:focus-within { border-color: var(--accent); }
+  .composer textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    resize: none;
+    outline: none;
+    padding: 8px 0;
+    max-height: 280px;
+    min-height: 28px;
+    line-height: 1.5;
+  }
+  .composer textarea::placeholder { color: #94a3b8; }
+  .send-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .send-btn:hover:not(:disabled) { background: var(--accent-2); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .send-btn svg { width: 18px; height: 18px; }
+
+  .composer-hint {
+    max-width: 760px;
+    margin: 8px auto 0;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    pointer-events: auto;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 12px 14px; }
+    main { padding: 18px 12px 140px; }
+    .welcome h1 { font-size: 22px; }
+    footer { padding: 12px 12px 14px; }
+    .brand small { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"><img src="/plate.svg" alt="Biluppgifter"></div>
+    <div>
+      Biluppgifter — Mailutkast
+      <small>Klistra in en kund-mail · få ett varmt svar-utkast</small>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="icon-btn" id="resetBtn" title="Börja om">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <div id="welcome" class="welcome">
+    <h1>Klistra in en kundmail nedan</h1>
+    <p>Jag tar fram ett varmt och konkret utkast på samma språk som mailet, med fokus på affärsnyttan av att använda vårt API. Du kan sedan be om ändringar i chatten — "kortare", "mer formellt", "byt CTA till demo", etc.</p>
+    <div class="tip">
+      <strong>Tips:</strong> ta med hela mailet inklusive avsändarens namn och företag om det syns. Då kan utkastet personliggöras direkt.
+    </div>
+  </div>
+  <div id="chat" class="chat"></div>
+</main>
+
+<footer>
+  <form class="composer" id="composer">
+    <textarea id="input" rows="1" placeholder="Klistra in kundens mail här…" autofocus></textarea>
+    <button type="submit" class="send-btn" id="sendBtn" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </form>
+  <div class="composer-hint">Cmd+Enter för att skicka · Shift+Enter för ny rad</div>
+</footer>
+
+<script>
+const state = {
+  messages: [],
+};
+
+const $ = (id) => document.getElementById(id);
+const chatEl = $('chat');
+const welcomeEl = $('welcome');
+const inputEl = $('input');
+const composerEl = $('composer');
+const sendBtn = $('sendBtn');
+const resetBtn = $('resetBtn');
+const mainEl = $('main');
+
+function autoresize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 280) + 'px';
+}
+
+inputEl.addEventListener('input', () => {
+  autoresize(inputEl);
+  sendBtn.disabled = !inputEl.value.trim();
+});
+
+inputEl.addEventListener('keydown', (e) => {
+  // Cmd/Ctrl+Enter skickar — Enter ensam ger ny rad eftersom mail-pasten kan innehålla många rader
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    composerEl.requestSubmit();
+  }
+});
+
+composerEl.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  autoresize(inputEl);
+  sendBtn.disabled = true;
+  welcomeEl.style.display = 'none';
+  await sendMessage(text);
+  inputEl.focus();
+});
+
+resetBtn.addEventListener('click', () => {
+  if (!confirm('Börja om från början?')) return;
+  state.messages = [];
+  chatEl.innerHTML = '';
+  welcomeEl.style.display = '';
+  inputEl.focus();
+});
+
+function addMessage(role, content) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  const avatar = role === 'user' ? 'Du' : '<img src="/plate.svg" alt="b">';
+  el.innerHTML = '<div class="avatar">' + avatar + '</div><div class="bubble"></div>';
+  const bubble = el.querySelector('.bubble');
+  bubble.textContent = content;
+  if (role === 'bot') {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = 'Kopiera';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(bubble.dataset.fullText || bubble.textContent || '');
+      copyBtn.textContent = 'Kopierat!';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = 'Kopiera';
+        copyBtn.classList.remove('copied');
+      }, 1800);
+    });
+    bubble.appendChild(copyBtn);
+  }
+  chatEl.appendChild(el);
+  mainEl.scrollTop = mainEl.scrollHeight;
+  return bubble;
+}
+
+function addLoadingMessage() {
+  const el = document.createElement('div');
+  el.className = 'msg bot';
+  el.innerHTML = '<div class="avatar"><img src="/plate.svg" alt="b"></div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
+  chatEl.appendChild(el);
+  mainEl.scrollTop = mainEl.scrollHeight;
+  return el;
+}
+
+async function sendMessage(text) {
+  addMessage('user', text);
+  state.messages.push({ role: 'user', content: text });
+
+  const loading = addLoadingMessage();
+  let bubble = null;
+  let fullText = '';
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: state.messages }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error('API-fel ' + response.status + ': ' + errorText);
+    }
+
+    loading.remove();
+    bubble = addMessage('bot', '');
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const obj = JSON.parse(data);
+          if (obj.type === 'content_block_delta' && obj.delta?.type === 'text_delta') {
+            fullText += obj.delta.text;
+            // Behåll copy-btn medan vi uppdaterar text
+            const copyBtn = bubble.querySelector('.copy-btn');
+            bubble.textContent = fullText;
+            if (copyBtn) bubble.appendChild(copyBtn);
+            bubble.dataset.fullText = fullText;
+            mainEl.scrollTop = mainEl.scrollHeight;
+          }
+        } catch (e) {}
+      }
+    }
+
+    state.messages.push({ role: 'assistant', content: fullText });
+  } catch (err) {
+    if (loading.parentNode) loading.remove();
+    const errMsg = '⚠️ Något strulade: ' + (err.message || err) +
+      '\n\nFörsök igen, eller maila info@biluppgifter.se om felet är kvar.';
+    if (bubble) {
+      bubble.textContent = errMsg;
+    } else {
+      addMessage('bot', errMsg);
+    }
+  }
+}
+</script>
+</body>
+</html>
