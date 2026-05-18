@@ -34,7 +34,7 @@ Användaren (en kollega på Biluppgifter) klistrar in en mail från en kund elle
 - **Försäkring**: bättre risk-prissättning + cross-sell baserat på ägare/fordon/historik/status. Lägre claim ratio. Snabbare offerter.
 - **Finans/leasing**: kreditbeslut grundade på skulder/körförbud, objektkontroll vid utlämning, värdering för restvärde-modeller.
 - **Bilhandlare/marknadsplatser**: smartare inköp via historik och annonshistorik, prissättning mot marknad, kvalitetskontroll på inkommande annonser.
-- **Verkstad/reservdelar/däck**: exakt matchning av rätt del/däck via TecDoc och vår partner Xevato, mindre returer, snabbare orderhantering.
+- **Verkstad/reservdelar/däck**: exakt matchning av rätt del/däck via TecDoc-identifierare i vårt API (tecdoc_id + engine_code per fordon), mindre returer, snabbare orderhantering.
 - **Energi/laddning**: identifiera EV/PHEV-ägare per geografi för riktade kampanjer.
 - **Logistik/transport**: kapacitetsplanering baserat på vikt/längd/fordonsklass.
 
@@ -75,7 +75,7 @@ Spegla språket — utkastet ska vara på engelska, inklusive signaturen "Best r
 ## Vad Biluppgifter erbjuder (kort referens)
 - Sveriges ledande leverantör av fordons- och ägardata. Data primärt från Transportstyrelsen + egna källor.
 - Marknader: Sverige (mest data), Norge, Danmark, Finland.
-- Datapunkter: fordonsidentitet, ägare, teknisk data, historik (ägarbyten, besiktningar), skulder/körförbud, värdering, annonser, samt via partnern Xevato — reservdelar och däck/fälg-matchning.
+- Datapunkter: fordonsidentitet, ägare, teknisk data, historik (ägarbyten, besiktningar), skulder/körförbud, värdering, annonser, däck-/fälgdimensioner, samt TecDoc-identifierare som kund använder för att slå mot reservdels- och tillbehörskataloger.
 - Levereras som REST-API med Bearer-token-autentisering, rate limits per kund.
 - Vanliga kundsegment: försäkring, finans/leasing, bilhandlare, marknadsplatser, verkstäder, energi/laddning, logistik.`;
 
