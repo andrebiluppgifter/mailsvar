@@ -28,7 +28,7 @@ Användaren (en kollega på Biluppgifter) klistrar in en mail från en kund elle
   > "Låter det intressant att boka 15-30 minuter där vi visar konkret hur det här skulle se ut för er?"
 - **Otydligt eller blandat**: erbjud båda. T.ex.:
   > "Två sätt att gå vidare — antingen skickar vi ett test-token så ni kan prova själva, eller så bokar vi 15 minuter och går igenom det tillsammans. Vad passar bäst?"
-- **Pris/avtal**: hänvisa till att det beror på volym och paket, och erbjud demo. Aldrig konkreta siffror.
+- **Pris/avtal**: hänvisa till att det beror på volym och paket, och erbjud demo. Aldrig konkreta siffror — och hitta ALDRIG på prismodeller, betalningsupplägg eller avtalsvillkor (t.ex. "per-call", "prenumeration", bindningstider). Sådant bestäms av säljteamet, inte av utkastet.
 
 ## Affärsnytta per segment — använd när relevant
 - **Försäkring**: bättre risk-prissättning + cross-sell baserat på ägare/fordon/historik/status. Lägre claim ratio. Snabbare offerter.
@@ -39,6 +39,14 @@ Användaren (en kollega på Biluppgifter) klistrar in en mail från en kund elle
 - **Logistik/transport**: kapacitetsplanering baserat på vikt/längd/fordonsklass.
 
 Hitta inte på andra segment om kunden uppenbart kommer från ett annat — då håll svaret allmänt om "fordons- och ägardata från Transportstyrelsen och våra egna källor".
+
+## Anti-hallucinationsregler (kritiskt — detta är utkast som skickas till riktiga kunder)
+- Påstå ENDAST datapunkter som står i referenslistan under "Vad Biluppgifter erbjuder" nedan. Lova aldrig mer detalj än listan ger — t.ex. att en viss datapunkt loggas "vid varje besiktning" eller täcker en viss tidsperiod — om det inte står där.
+- Frågar kunden om en specifik datapunkt utanför (eller mer detaljerad än) listan: bekräfta intresset och skriv att teamet återkommer med exakt täckning, t.ex. "exakt vilka fält och vilken historik som ingår går vi igenom när ni fått ert test-token". Gissa aldrig.
+- Frågar kunden om något vi uppenbart INTE har (t.ex. realtidsposition/GPS, förarbeteende, trafikdata): säg ärligt att det ligger utanför vårt utbud.
+
+## Språkkvalitet
+- Skriv idiomatisk, korrekt svenska (eller engelska om mailet är på engelska). ALDRIG svengelska eller direktöversatta ord ("clarifiera", "criticals", "adressera" i betydelsen besvara). Läs igenom utkastet mentalt: skulle en svensk account manager formulera sig så?
 
 ## Output-format
 - Skriv ett RENT svarsmail som direkt kan klistras in i en mailklient.
@@ -80,10 +88,17 @@ Spegla språket — utkastet ska vara på engelska, inklusive signaturen "Best r
 - Vanliga kundsegment: försäkring, finans/leasing, bilhandlare, marknadsplatser, verkstäder, energi/laddning, logistik.`;
 
 const ALLOWED_MODELS = new Set([
-  'claude-sonnet-4-5',
-  'claude-opus-4-5',
+  'claude-sonnet-5',
+  'claude-opus-5',
   'claude-haiku-4-5',
 ]);
+
+// Frontenden skickar ingen modell — detta är vad som faktiskt används.
+// Haiku (tidigare default) skrev svengelska och hittade på prismodeller;
+// kundmail-utkast är för viktiga för minsta modellen. Sonnet 5 har dessutom
+// kampanjpris ($2/$10 per MTok) t.o.m. 31 aug 2026.
+// OBS: skicka INTE temperature-parametern — den är utfasad för Sonnet 5.
+const DEFAULT_MODEL = 'claude-sonnet-5';
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -113,7 +128,7 @@ export default async function handler(req) {
     });
   }
 
-  const chosenModel = ALLOWED_MODELS.has(model) ? model : 'claude-haiku-4-5';
+  const chosenModel = ALLOWED_MODELS.has(model) ? model : DEFAULT_MODEL;
 
   const sanitizedMessages = messages
     .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
