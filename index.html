@@ -446,6 +446,7 @@ async function sendMessage(text) {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let stopReason = null;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -459,6 +460,9 @@ async function sendMessage(text) {
         if (data === '[DONE]') continue;
         try {
           const obj = JSON.parse(data);
+          if (obj.type === 'message_delta' && obj.delta?.stop_reason) {
+            stopReason = obj.delta.stop_reason;
+          }
           if (obj.type === 'content_block_delta' && obj.delta?.type === 'text_delta') {
             fullText += obj.delta.text;
             // Behåll copy-btn medan vi uppdaterar text
@@ -473,6 +477,10 @@ async function sendMessage(text) {
     }
 
     state.messages.push({ role: 'assistant', content: fullText });
+
+    if (stopReason === 'max_tokens') {
+      addMessage('bot', '⚠️ Svaret blev för långt och klipptes av. Skriv "fortsätt" eller be om en kortare version.');
+    }
   } catch (err) {
     if (loading.parentNode) loading.remove();
     const errMsg = '⚠️ Något strulade: ' + (err.message || err) +
