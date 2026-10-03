@@ -53,7 +53,7 @@ Hitta inte på andra segment om kunden uppenbart kommer från ett annat — då 
 - Använd "Hej [Namn]," om kundens förnamn syns i deras mail, annars bara "Hej".
 - INGEN markdown (inga **fet**, *kursiv*, # rubriker, - punktlistor).
 - Inga citat eller >-rader från ursprungs-mailet.
-- Brevkroppen: 2-4 korta stycken. Inte längre.
+- Brevkroppen: normalt 2-4 korta stycken. Om kunden ställer flera konkreta frågor ska alla besvaras (ett kort stycke per fråga är ok), och om kollegan ber om ett längre svar får det bli längre.
 - Avsluta ALLTID med signaturen:
 
   Vänliga hälsningar,
@@ -149,7 +149,9 @@ export default async function handler(req) {
     },
     body: JSON.stringify({
       model: chosenModel,
-      max_tokens: 1500,
+      // Sonnet 5 tänker innan den svarar och tänkandet räknas in i max_tokens.
+      // 1500 räckte inte för långa mail — svaren klipptes mitt i.
+      max_tokens: 8000,
       system: SYSTEM_PROMPT,
       stream: true,
       messages: sanitizedMessages,
